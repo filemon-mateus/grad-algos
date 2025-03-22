@@ -97,7 +97,7 @@
               increasing sequence of $m$ distinct sorted ranks $K[1 \cdots m]$.}
               \Ensure{The $k$-th smallest number in $A$ for all $k \in K$.}
               \If{$|K| = 1$} \Comment{base case}
-              \State $x \gets \Call{Quick-Select}{A, K[1]}$ \Comment{randomized quick-select}
+                \State $x \gets \Call{Quick-Select}{A, K[1]}$ \Comment{randomized quick-select}
                 \State \Call{Print}{$x$}
               \Else
                 \State $i \gets \floor{|K|/2}$
