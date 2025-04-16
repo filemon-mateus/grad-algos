@@ -1,0 +1,148 @@
+\documentclass{article}
+\usepackage{preamble}
+
+\begin{document}
+\header{Filemon Mateus}{CS 6150}{Graduate Algorithms}{Homework \# 6}{\today}
+\begin{enumerate}[leftmargin={*}, font={\bf}, label={\arabic*.}, ref={\arabic*}]
+  \item
+    {\itshape Algorithm Description}
+
+    We proceed by modeling the network of trails as a directed graph $G(V, E)$ where each edge $(u,
+    v) \in E$ has an associated value $\E(u,v)$ that represents the expected number of slide
+    occurrences while traversing $(u,v)$ and visiting $v$. By modeling this way, we remove the weights
+    on the vertices (and aggregate them on the edges) in such way that an edge $(u,v)$ with terminal
+    incidence at $v$ has an assigned value of:
+    \begin{equation}
+      \E(u,v) = w(u,v) + w(v) \label{eq:1}
+    \end{equation}
+    With this configuration in mind, we aim to find a path $p$ such that the expectation on the number
+    of slide occurrences on $p$ is minimized. Let $s$ be the source and $t$ be the terminal, and let
+    $p$ be the sequence $(v_0, v_1, \cdots, v_k)$, where $v_0 = s$ and $v_k = t$, then:
+    \begin{equation}
+      p = \arg \min \left(w(s) + \sum_{i=1}^k \E(v_{i-1}, v_i)\right) \label{eq:2}
+    \end{equation}
+
+    We use Dijkstra's algorithm to solve the single source shortest path problem on the converted
+    graph. Using \autoref{eq:2} the following setup is assumed:
+    \begin{itemize}[label={\large$\circ$}, itemsep={0pt}]
+      \item
+        {\itshape Vertices} --- unchanged sites on the map with no associated probabilities nor
+        weights except for $s$ which has an assigned weight $w(s)$ representing the expected number
+        of slides in $s$.
+      \item
+        {\itshape Edges} --- directed routes between different sites of the map with edge weights
+        given by \eqref{eq:1}.
+    \end{itemize}
+    We set the source $s$ to be the marked position on our friends on the map and initialize the
+    $cost(s)$ to $w(s)$ as we must account for the expectation in $s$. Then we exhaust all paths
+    going from $s$ to the remaining vertices of $G$ and (since edge weights encode expectations)
+    we pick the smallest path with terminal at a trailhead. \\
+
+    {\itshape Time Analysis}
+
+    Let $V$ represent the different sites on the map and $E$ the routes between them. Then we can
+    construct $G$ in $\O(V+E)$ time. A call to Dijkstra on $G$ takes $\O((E+V) \log V)$ and the
+    reconstruction of $p$ takes at most $\O(V)$ with backtracking. This yields a total running time
+    of $\O((E+V) \log V)$.
+
+  \item
+    Consider the following definition:
+    \begin{definition*}
+      Let $G = (V, E)$ be an undirected graph with edge-weights given by $w \colon E \rightarrow
+      \mathbb{R}$. Assume that $w(e) \neq w(f)$ whenever $e, f$ are distinct edges of $G$.  We say
+      that an edge is \textit{treacherous} if it is the maximum weight edge for some cycle of $G$.
+      On the other hand, an edge is \textit{reliable} if it is not contained in any cycle of $G$.
+    \end{definition*}
+
+    \begin{claim}
+      \label{clm:reliable-edge}
+      The minimum spanning tree of $G$ contains every \textit{reliable} edge.
+    \end{claim}
+
+    \begin{proof*}
+      Assuming $G$ is connected, we prove the more general claim $P$ that ``an edge $e$ is
+      \textit{reliable} in $G$ if and only if it belongs to every spanning tree of $G$.'' Note
+      \autoref{clm:reliable-edge} follows as a direct consequence of $P$.
+
+      \begin{description}[itemsep={0pt}]
+        \item[$\Longrightarrow$]
+          ({\itshape Sufficient Condition}) --- Suppose $e$ does not belong to every spanning
+          tree of $G$. Let $T$ be a spanning tree that does not contain $e$. Then the spanning
+          tree $T$ is a subgraph of $G \setminus \{e\}$. It follows then that for any arbritrary
+          vertices $u, v$ in $G \setminus \{e\}$ there is a unique $(u, v)$ path in $T$. This
+          is also a $(u, v)$ path in $G \setminus \{e\}$ since $T \subseteq G \setminus \{e\}$.
+          Thus, $G \setminus \{e\}$ is connected, and $e$ is not \textit{reliable} in $G$.
+        \item[$\Longleftarrow$]
+          ({\itshape Necessary Condition}) --- If $e$ is not {\it reliable} (and part of cycle)
+          in $G$ then its removal causes $G \setminus \{e\}$ to remain connected. So $G \setminus
+          \{e\}$ must have a spanning tree. But such a spanning tree would also be a spanning
+          tree of $G$ since it has the same vertex set, but it wouldn't contain $e$.
+      \end{description}
+    \end{proof*}
+
+    \begin{claim}
+      \label{clm:treacherous-edge}
+      The minimum spanning tree of $G$ does not contain any \textit{treacherous} edge.
+    \end{claim}
+
+    \begin{proof*}
+      Suppose (for the sake of contradiction) that there is a minimum spanning tree, say $T$,
+      containing a \textit{treacherous} edge $e = (u, v)$ of some cycle $C$ of $G$.
+
+      Let $T^\prime = T \setminus \{e\}$. Then $T^\prime$ has two connected components. Because
+      $e$ was part of cycle $C$, there is a path connecting $u$ and $v$ in $G$ not containing $e$.
+      This path must contain an edge with endpoints in different connected components of $T^\prime$.
+      Let such edge be $e^\prime$. Because $e^\prime$ and $e$ are in $C$ and by assumption $e$ is
+      the edge with maximum weight in $C$, it follows that $w(e^\prime) < w(e)$.
+
+      Construct $T^{\prime\prime} = T^\prime \cup \{e^\prime\}$. Note $T^{\prime\prime}$ is connected
+      as $e^\prime$ created a path between the two connected components of $T^\prime$.  Additionally,
+      $T^{\prime\prime}$ has the exactly number of edges as $T$, so $T^{\prime\prime}$ is a valid
+      spanning tree of $G$. But its weight:
+      \[
+        w(T^{\prime\prime}) = w(T) - w(e) + w(e^\prime) < w(T)
+      \]
+      Thus $T^{\prime\prime}$ is a spanning tree of $G$ with smaller weight that $T$---the minimum
+      spanning tree of $G$. But this contradicts the initial supposition of minimality of $T$ in $G$.
+    \end{proof*}
+
+    \bigskip
+
+    {\itshape Algorithm Description}
+
+    We proceed as follows. We iteratively delete the highest \textit{treacherous} edge until the
+    resulting graph becomes acyclic. Since we only delete \textit{treacherous} edges, the resulting
+    graph stays connected. Since we stop when the graph becomes acyclic, the output will indeed
+    be a spanning tree. Since the only edges removed were edges by \autoref{clm:treacherous-edge}
+    not contained in any minimum weight spanning tree, the resulting tree must have minimum weight
+    and be the MST of $G$. The pseudocode for this is provided below.
+
+    \bigskip
+
+    {\itshape Algorithm Pseudocode} \vspace{-\baselineskip}
+
+    \begin{minipage}{\linewidth}
+      \begin{algorithm}[H]
+        \caption{$\textsc{Minimum-Spanning-Tree}(G \gets (V, E))$}\label{alg:reverse-delete}
+        \begin{algorithmic}[1]
+          \State $T \gets \Call{Reverse-Sort-By-Weight}{E}$
+          \For{$e \in T$}
+            \If{$T \setminus \{e\}$ is connected}
+              \State $T \gets T \setminus \{e\}$
+            \EndIf
+          \EndFor
+          \State \Return $T$
+        \end{algorithmic}
+      \end{algorithm}
+    \end{minipage}
+    
+    \bigskip
+
+    {\itshape Time Analysis}
+
+    The implementation of \autoref{alg:reverse-delete} begins by sorting the edges in $\O(E \log E)$
+    time. For each edge $e$ we check whether $T \setminus \{e\}$ is connected and we do so via {\sc
+    dfs}. Each call to {\sc dfs} takes $\O(V+E)$, and doing for all entries of $E$ takes $\O(E(V+E))$.
+    Since $G$ is connected, $E$ dominates $V$ asymptotically, so the total running time is $\O(E^2)$.
+\end{enumerate}
+\end{document}

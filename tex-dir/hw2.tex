@@ -1,0 +1,406 @@
+\documentclass{article}
+\usepackage{preamble}
+
+\begin{document}
+\header{Filemon Mateus}{CS 6150}{Graduate Algorithms}{Homework \# 2}{\today}
+\begin{enumerate}[leftmargin={*}, font={\bf}, label={\arabic*.}, ref={\arabic*}]
+  \item \label{qst:1}
+    \begin{enumerate}
+      \item \label{qst:1a}
+        {\it Algorithm Description}
+
+        We proceed with a ``Divide and Conquer'' strategy and divide the problem of merging
+        $k$ sorted lists as follows:
+
+        \begin{itemize}[itemsep={-3pt}]
+          \item
+            Merge $\floor{k/2}$ sorted lists $L_1,\dots,L_{\floor{k/2}}$ into one single sorted
+            list $A_1$.
+          \item
+            Merge $\ceil{k/2}$ sorted lists $L_{\floor{k/2} + 1},\dots,L_k$ into one single sorted
+            list $A_2$.
+        \end{itemize}
+
+        Then we conquer the two aforementioned problems with recursion and combine their respective
+        solutions $A_1$ and $A_2$ into $A_3$ using the canonical {\sc Merge} subroutine discussed in
+        class.
+
+      \item \label{qst:1b}
+        {\it Algorithm Pseudocode} \vspace{-\baselineskip}
+        
+        \begin{minipage}{\linewidth}
+          \begin{algorithm}[H]
+            \caption{$\textsc{Merge-Lists}(L_1, \ldots, L_k)$}\label{alg:merge-lists}
+            \begin{algorithmic}[1]
+              \If{$k = 1$} \Comment{base case}
+                \State \Return $L_1$
+              \EndIf
+              \State $A_1 \gets \Call{Merge-Lists}{L_1, \ldots, L_{\floor{k/2}}}$ \Comment{conquer left subproblem with recursion}
+              \State $A_2 \gets \Call{Merge-Lists}{L_{\floor{k/2} + 1}, \ldots, L_k}$ \Comment{conquer right subproblem with recursion}
+              \State $A_3 \gets \Call{Merge}{A_1, A_2}$ \Comment{combine solutions with \textsc{Merge} subroutine}
+              \State \Return $A_3$ 
+            \end{algorithmic}
+          \end{algorithm}
+        \end{minipage}
+
+      \item \label{qst:1c}
+        {\it Algorithm Correctness}
+
+        To show the correctness of \autoref{alg:merge-lists}, we will use (strong) induction on
+        $k$. Let $k$ be an arbitrary integer greater or equal to $1$. Let $L_1, \ldots, L_k$ be
+        $k$ arbitrary lists (with the assumption that all numbers in the lists are distinct). We
+        wish to show that {\sc Merge-Lists}, on input $L_1, \ldots, L_k$, merges them into one
+        single sorted list.
+
+        \begin{itemize}[itemsep=0pt]
+          \item
+            {\it Base Case}: for the base case we have $k = 1$. In this case, $L_1$ is already
+            sorted and Step $2$ of \autoref{alg:merge-lists} simply returns the single list $L_1$.
+
+          \item
+            {\it Inductive Hypothesis}: assume \autoref{alg:merge-lists} correctly merges $m$
+            sorted lists, for every $m < k$, into one single sorted list.
+
+          \item
+            {\it Inductive Step}: from the inductive hypothesis, it follows that $A_1$ and $A_2$
+            are sorted lists because they merge $\floor{k/2} < k$ and $\ceil{k/2} < k$ sorted 
+            lists, respectively. Since the {\sc Merge} subroutine correctly merges two sorted lists
+            into a single sorted list, $A_1$ and $A_2$ are correctly combined into a single sorted
+            list. We conclude then that \autoref{alg:merge-lists} correctly merges the $k$ sorted
+            lists into a single sorted list. \hfill $\square$
+        \end{itemize}
+
+      \item \label{qst:1d}
+        {\it Algorithm Analysis}
+
+        Let $T(n, k)$ be the total running time of merging $k$ sorted lists with a total of $n$
+        elements. We have $T(n, k) = \O(n)$ for $k = 1$; note $L_1$ in Step $2$ of
+        \autoref{alg:merge-lists} will contain exactly $n$ elements requiring potential copies
+        so it is prudent to assume it takes time proportional to $n$ at the base case. For the
+        recursion, $A_1$ is a list of size $n_1$ and $A_2$ is a list of size $n_2$ where $n_1 +
+        n_2 = n$. So merging them takes $\O(n)$ time. Thus, the recurrence becomes:
+
+        \[
+          T(n, k) =
+            \begin{cases}
+              n & \text{if}\ k = 1 \\ 
+              T(n_1, \floor{k/2}) + T(n_2, \ceil{k/2}) + n & \text{otherwise}
+            \end{cases}
+        \]
+
+        To solve this recurrence, we proceed with the recursion tree approach. For simplicity
+        assume $k$ is a power of $2$. Then the recursion tree is a complete binary tree with $k$
+        nodes at the leaves and depth $\log k$. The work at the root node is $n$.  At the next
+        level is $n_1 + n_2$ which is $n$. Each level incurs an $\O(n)$ cost and there are $\log
+        k$ levels hence the total work is $\O(n \log k)$. \hfill $\square$
+    \end{enumerate}
+
+  \item \label{qst:2}
+    \begin{enumerate}
+      \item \label{qst:2a}
+        $(4,2), (4,1), (2,1), (9,1), (9,7)$.
+
+      \item \label{qst:2b}
+        The array with entries from the set $\{1, 2, \ldots, n\}$ with the most inversions will
+        have their entries in ``backward,'' reversed sorted order: $\{n, n-1, \ldots, 1\}$. This
+        is because every single pair of array indices is inverted, so we get $n-1$ inversions
+        with the first entry, $n-2$ inversions with the second entry, $n-3$ inversions with the
+        third entry, and so on. In general, for a fixed index $i$ we will have $n-i$ inversions.
+        So the total number of inversions over all possible choices of $i$ will be:
+        \[
+          \sum_{i=1}^{n}\ (n-i) = (n-1) + (n-2) + \cdots + 1 + 0 = \frac{n(n-1)}{2}
+        \]
+
+      \item \label{qst:2c}
+        \begin{enumerate}[leftmargin={*}, label={\arabic*.}]
+          \item
+            {\it Algorithm Description}
+
+            We proceed with a ``Divide and Conquer'' strategy motivated by \textsc{Merge-Sort}.
+            Specifically, for pairs of array indices $(i, j)$ with $i < j$, we distinguish three
+            inversion cases: $(1)$ a left-inversion if $i, j \leq \floor{n/2}$, $(2)$ a
+            right-inversion if $i, j \geq \ceil{n/2}$, and $(3)$ a cross-inversion if $i \leq
+            \floor{n/2}$ and $j \geq \ceil{n/2}$. Similar to \textsc{Merge-Sort}, we start by
+            splitting the array into two (nearly equal) halves. We then recurse on the left and
+            count all the inversions that are restricted to the first half of the array. These
+            are precisely the left-inversions. Then we invoke a second recursive call on the
+            right to count all the right-inversions. Finally, we delegate the residual work
+            left over (i.e. counting the number of cross-inversions) to a modified version of
+            the \textsc{Merge} subroutine (see \autoref{alg:count-inversions} for details).
+            Since every inversion is either left or right or cross and cannot be any more than
+            one of these three, we can simply report the sum of the results of the two recursive
+            calls plus the output from the aforementioned, modified \textsc{Merge} subroutine.
+
+          \item
+            {\it Algorithm Pseudocode} \vspace{-\baselineskip}
+            
+            \begin{minipage}{\linewidth}
+              \begin{algorithm}[H]
+                \caption{Reports the total number of inversions in $A[p \cdots q]$}\label{alg:count-inversions}
+                \begin{algorithmic}[1]
+                  \Function{Count-Inversions}{$A,p,q$}
+                    \If{$p \geq q$}
+                      \State \Return $0$
+                    \EndIf
+                    \State $m \gets \floor{(p + q) / 2}$
+                    \State $l \gets \Call{Count-Inversions}{A,p,m}$ \Comment{count left-inversions}
+                    \State $r \gets \Call{Count-Inversions}{A,m+1,q}$ \Comment{count right-inversions}
+                    \State $c \gets \Call{Cross-Inversions}{A,p,m,q}$ \Comment{count cross-inversions}
+                    \State \Return $l + c + r$
+                  \EndFunction
+                  \State
+                  \Function{Cross-Inversions}{$A,p,m,q$} \Comment{modified \textsc{Merge} subroutine}
+                    \State $n_1 \gets m - p + 1$
+                    \State $n_2 \gets q - m$
+                    \State $L[1 \cdots n_1] \gets A[p \cdots m]$
+                    \State $R[1 \cdots n_2] \gets A[m + 1 \cdots q]$
+                    \State $i \gets 1$
+                    \State $j \gets 1$
+                    \State $c \gets 0$ \Comment{counts \#\ of cross-inversions}
+                    \For{$k \gets p$ \textbf{to}\ $q$}
+                      \If{$n_1 < i$} \Comment{if we exhaust $L$ then copy unexhausted items of $R$ into $A$}
+                        \State $A[k] \gets R[j]$
+                        \State $j \gets j + 1$
+                      \ElsIf{$n_2 < j$} \Comment{if we exhaust $R$ then copy unexhausted items of $L$ into $A$}
+                        \State $A[k] \gets L[i]$
+                        \State $i \gets i + 1$
+                      \ElsIf{$L[i] \leq R[j]$} \Comment{this does not cause an inversion}
+                        \State $A[k] \gets L[i]$
+                        \State $i \gets i + 1$
+                      \Else \Comment{but this does!}
+                        \State $A[k] \gets R[j]$
+                        \State $j \gets j + 1$
+                        \State $c \gets c + (n_1 - i + 1)$ \Comment{inversion pairs $(L[i], R[j]), (L[i+1], R[j]), \ldots, (L[n_1], R[j])$}
+                      \EndIf
+                    \EndFor
+                    \State \Return $c$
+                  \EndFunction
+                \end{algorithmic}
+              \end{algorithm}
+            \end{minipage}
+
+          \item
+            {\it Algorithm Correctness}
+
+            We use (strong) induction on $n$, the number of elements in $A$, to demonstrate the
+            correctness of \autoref{alg:count-inversions}. Recall the number of elements in $\{A[p],
+            A[p+1], \ldots, A[q]\}$ is $q - p + 1$, and henceforth, we will denote this by $|A|$.
+
+            \begin{itemize}[itemsep=0pt]
+              \item
+                {\it Base Case}: when $|A| \leq 1$, notice the number of inversions in $A$ is $0$.
+                If $A$ contains at most one element then ($p \geq q$) and Step $3$ of
+                \autoref{alg:count-inversions} gets executed---reporting $0$ as its output. It
+                follows then that \autoref{alg:count-inversions} executes correctly as intended
+                and produces the desired, expected output when $|A| \leq 1$.
+              \item
+                {\it Induction Hypothesis}: assume that \autoref{alg:count-inversions} reports the
+                correct number of inversions when $|A| \leq k$, for every $k = 2, 3, \ldots, n-1$,
+                and in the process sorts $A$ from left to right.
+
+              \item
+                {\it Induction Step}: now consider when $|A| = n$. Step $5$ of
+                \autoref{alg:count-inversions} divides $A$ into two subarrays of nearly equal sizes.
+                Let $L$ represent the subarray $A[p \cdots m]$ and $R$ represent the subarray $A[m+1
+                \cdots q]$. Clearly $|L| < n$ and $|R| < n$.  Thus, applying the inductive hypothesis,
+                we are guaranteed that the number of inversions produced in Steps $6$ and $7$ are
+                correct, i.e. $l$ stores the correct number of inversions in $L$ and $r$ stores the
+                correct number of inversions in $R$. Moreover, based on the induction hypothesis,
+                $L$ and $R$ are now sorted so there are no longer any inversions in $L$ nor in $R$,
+                only inversions between $L$ and $R$. So let's proceed to analyze the
+                \textsc{Cross-Inversions} subroutine, which we delegated earlier to handle precisely
+                the counting of the cross-inversions between $L$ and $R$. Recall that if an element
+                $R_j$ from the list $R$ is selected ahead of $m$ items from list $L$, then $R_j$ is
+                less than the remaining $m$ elements from list $L$, corresponding to $m$ inversions.
+                Additionally, selecting $R_j$ to be placed as the next element in the new combined,
+                sorted list eliminates all $m$ inversions. So no new inversions are created in the
+                merging step of the {\sc Cross-Inversions} subroutine. Consequently, no inversions
+                are counted twice, since removing an invertion merges $L$ and $R$ into one combined
+                list, and inversions can only exist between lists. Therefore, {\sc Cross-Inversions},
+                along with the two recursive calls, correctly account for all inversions in $A$.
+                \hfill $\square$
+            \end{itemize}
+
+          \item
+            {\it Algorithm Analysis}
+
+            Let $T(n)$ represent the total running time of \autoref{alg:count-inversions} on an
+            input of size $n$.  At the base case, we have $T(n) = 1$ for $n = 1$. For the recursion,
+            we have two subproblems of size $\floor{n/2}$ and $\ceil{n/2}$, and since we are
+            piggy-backing on the \textsc{Merge} subroutine, we have a combine step of $\O(\floor{n/2}
+            + \ceil{n/2}) = \O(n)$. Thus, the recurrence becomes: $T(1) = 1$, $T(n) = 2T(n/2) + n$.
+            With $a = 2$, $b = 2$, and $f(n) = n$, this recursion solves to $\Theta(n \log n)$,
+            according to case $2$ of the Master Theorem discussed in class.
+        \end{enumerate}
+    \end{enumerate}
+
+  \item \label{qst:3}
+    \begin{enumerate}
+      \item \label{qst:3a}
+        $T(n) = 2T(n/2) + n^3$. Here $a = 2$, $b = 2$, $f(n) = n^3$, and $n^{\log_b a} = n^{\log_2
+        2} = n$.  For $\varepsilon = 2$, we have $f(n) = \Omega(n^{\log_2 2 + \varepsilon})$. So
+        case $3$ of the Master Theorem applies if we can show that $af(n/b) \leq cf(n)$ for some $c
+        < 1$ and all sufficiently large $n$. This would mean $(1/4)n^3 \leq cn^3$. Setting $c = 
+        1/3$ would cause this condition to be satisfied. Hence $T(n) = \Theta(n^3)$.
+
+      \item \label{qst:3b}
+        $T(n) = 4T(n/2) + n\sqrt{n}$. Here $a = 4$, $b = 2$, $f(n) = n\sqrt{n}$, and $n^{\log_b a}
+        = n^{\log_2 4} = n^2$. Since $f(n) = \O(n^{\log_2 4 - \varepsilon})$ for $\varepsilon = 0.5$,
+        case 1 of the Master Theorem applies, and the solution is $T(n) = \Theta(n^2)$.
+
+      \item \label{qst:3c}
+        $T(n) = 2T(n/2) + n\log n$. To solve this recurrence, we can simply expand the recurrence
+        as follows (ommitting straighforward simplifications):
+        \begin{align*}
+          T(n) &= 2T\left(\frac{n}{2}\right) + n\log n \\
+               &= 4T\left(\frac{n}{4}\right) + n\left(\log n + \log \frac{n}{2}\right) \\
+               &= 8T\left(\frac{n}{8}\right) + n\left(\log n + \log \frac{n}{2} + \log \frac{n}{4}\right) \\
+               &= \hspace{21mm}\vdots \\
+               &= 2^kT\left(\frac{n}{2^k}\right) + n \sum_{i=0}^{k-1} \log \frac{n}{2^i} \\
+               &= 2^kT\left(\frac{n}{2^k}\right) + n \left[\sum_{i=0}^{k-1} \log n - \sum_{i=0}^{k-1} \log 2^i\right] \\
+               &= 2^kT\left(\frac{n}{2^k}\right) + n \left[\sum_{i=0}^{k-1} \log n - \sum_{i=0}^{k-1} i\right] \\
+               &= 2^kT\left(\frac{n}{2^k}\right) + n \left[k\log n - \frac{k(k-1)}{2}\right] \\
+               &= 2^kT\left(\frac{n}{2^k}\right) + nk\left(\log n - \frac{k}{2} + \frac{1}{2}\right)
+        \end{align*}
+        The expanding stops once $n/2^k$ is equal to $1$, which means $k = \log n$. When $k = \log
+        n$, we have:
+        \begin{align*}
+          T(n) &= 2^{\log n}\ T\left(\frac{n}{2^{\log n}}\right) + n\log n\left(\log n - \frac{1}{2}\log n + \frac{1}{2}\right) \\
+               &= nT(1) + n\log n \left(\frac{1}{2}\log n + \frac{1}{2}\right) \\
+               &= n + \frac{1}{2}n\log^2 n  + \frac{1}{2} n\log n \\
+               &= \O(n\log^2 n)
+        \end{align*}
+        Therefore, we conclude $T(n) = \O(n\log^2 n)$.
+
+      \item \label{qst:3d}
+        $T(n) = T(3n/4) + n$. We guess the solution is $T(n) = \O(n)$. According to the definition
+        of big-$\O$ notation, we want to find a constant $c > 0$ and an integer $n_0 \geq 1$ such
+        that $T(n) \leq cn$ for all sufficiently large $n \geq n_0$. We proceed with (strong)
+        induction on $n$ and assume $T(n) \leq cn$ is true for all positive numbers less than $n$.
+        Then $T(3n/4) \leq (3/4)cn$ and $T(n) \leq (3/4) cn + n$. Hence, in order to prove $T(n)
+        \leq cn$, it is sufficient to prove that $(3/4)cn + n \leq cn$, or equivalently, $(3/4)c +
+        1 \leq c$. It is easy to see that any $c \geq 4$ suffices. So for any choices of $c \geq 
+        4$ and $n_0 = 1$, $T(n) \leq cn$ holds for all sufficiently large $n \geq n_0$. Therefore,
+        $T(n) = \O(n)$.
+    \end{enumerate}
+
+  \item \label{qst:4}
+    \begin{enumerate}
+      \item \label{qst:4a}
+        {\it Algorithm Description}
+
+        We proceed with a ``Divide and Conquer'' strategy and split the daily stock prices into
+        two (nearly equal) halves. In doing so, we distinguish three possible cases for the optimal
+        buy and sell times: (1) optimal buy and sell times lie exclusively in the first half of
+        the split; (2) optimal buy and sell times lie exclusively in the second half of the split;
+        and (3) optimal buy time lies in the first half of the split and optimal sell time lies in
+        the second half of the split.
+
+        Similar to the inversion problem in \ref{qst:2}, we can obtain the corresponding values
+        of (1) and (2) by simply recursing on the left and right halves of the array. However,
+        for (3) we should strategize buying on the lowest possible day on the left and selling
+        on the highest possible day on the right. Our tentative solution then becomes as follows:
+        if the array has size $0$ or $1$, the maximum profit is $0$; otherwise, we split the array
+        in half and compute the maximum profit on the left, and call it $L_{profit}$. We compute
+        the maximum profit on the right, and call it $R_{profit}$. We find the minimum on the left,
+        and call it $L_{min}$. We find the maximum on the right, call it $R_{max}$. We report the
+        maximum of $L_{profit}, R_{profit}$, and $R_{max} - L_{min}$ as our final output.
+
+        In analyzing the time complexity of our solution, it is evident that our recurrence has a
+        base case that incurs an $\O(1)$ cost. However, for its recursive step, we have two
+        recursive calls on a subproblem half as large as the original input followed by an
+        additional linear cost incurred by the task of finding the maximum and minium values across
+        the left and right. Thus, the recurrence becomes: $T(1) = 1$, $T(n) = 2T (n/2) + n$, which
+        solves to $\Theta(n \log n)$---which is not quite what we want.
+
+        The key idea to improve this is to delegate the linear task of finding the maximum and
+        minimum values to the recursive calls. This solution works just as before, but now it never
+        incurs an $\O(n)$ cost at each step to find the minimum and maximum values. In fact, it
+        only incurs $\O(1)$ work at each level. So we get a new recurrence of the form: $T(1) = 1$,
+        $T(n) = 2T(n/2) + 1$, which solves to $\O(n)$, as desired. The pseudocode for this is given
+        below.\footnote{
+          Note that this solution returns the maximum profit, not the indices/days it occurs. To
+          get the indices/days, we resort to the classic ``two-sum'' problem, which can conviniently
+          be solved in $\O(n)$ time with auxiliary linear space. Consult
+          \autoref{alg:max-single-sell-profit} for details.
+        }
+
+      \item \label{qst:4b}
+        {\it Algorithm Pseudocode} \vspace{-\baselineskip}
+        
+        \begin{minipage}{\linewidth}
+          \begin{algorithm}[H]
+            \caption{Maximum Single Sell Profit}\label{alg:max-single-sell-profit}
+            \begin{algorithmic}[1]
+              \Function{Max-Single-Sell-Profit}{$A, p, q$} \Comment{maximum single sell profit from $A[p \cdots q]$}
+                \If{$p = q$}
+                  \State \Return{$(0, A[p], A[q])$}
+                \EndIf
+                \State $m \gets \floor{(p + q) / 2}$
+                \State $(L_{profit}, L_{min}, L_{max}) \gets \Call{Max-Single-Sell-Profit}{A, p, m}$
+                \State $(R_{profit}, R_{min}, R_{max}) \gets \Call{Max-Single-Sell-Profit}{A, m + 1, q}$
+                \State $x \gets \Call{Max}{L_{profit}, R_{profit}, R_{max} - L_{min}}$
+                \State $y \gets \Call{Min}{L_{min}, R_{min}}$
+                \State $z \gets \Call{Max}{L_{max}, R_{max}}$
+                \State \Return{$(x, y, z)$}
+              \EndFunction
+              \State
+              \Function{Query-Max-Profit-Indices}{$A, x$} \Comment{classic two-sum problem}
+                \State $i \gets 1$
+                \State $j \gets 1$
+                \State $\mathcal{H} \gets \{\}$ \Comment{an amortized constant time lookup table}
+                \For{$k \gets 1$ \textbf{to}\ $n$}
+                  \State $y \gets A[k] - x$
+                  \If{$y$ \textbf{in}\ $\mathcal{H}$}
+                    \State $i \gets \mathcal{H}[y]$
+                    \State $j \gets k$
+                    \State \Return{$\left(i, j\right)$} \Comment{buy on day $i$, sell on day $j$}
+                  \EndIf
+                  \State $\mathcal{H}\left[A[k]\right] \gets k$
+                \EndFor
+                \State \Return{$\left(i, j\right)$} \Comment{here $i = j = 1$ so no way to make money}
+              \EndFunction
+            \end{algorithmic}
+          \end{algorithm}
+        \end{minipage}
+
+      \item \label{qst:4c}
+        {\it Algorithm Correctness}
+
+        We prove the correctness of \autoref{alg:max-single-sell-profit} by using (strong) induction
+        on $n$---the number of permissible days to buy and sell stocks. Note the number of days in
+        $\{A[p], A[p+1], \ldots, A[q]\}$ is $q - p  + 1$ and we denote by $|A|$.
+
+        \begin{itemize}[itemsep=0pt]
+          \item
+            {\it Base Case}: when $|A| = 1$ the maximum profit is $0$ and $q - p + 1 = 1$. So $p =
+            q$ and Step $3$ of \autoref{alg:max-single-sell-profit} gets executed, reporting $0$ in
+            its first entry. It follows then \autoref{alg:max-single-sell-profit} works correctly
+            as intended and produces the desired, expected output when $|A| = 1$.
+
+          \item
+            {\it Induction Hypothesis}: assume that \autoref{alg:max-single-sell-profit} reports
+            the correct maximum profit along with the minimum and maximum values on the left and
+            right when $|A| \leq k$, for every $k = 2, \ldots, n-1$.
+
+          \item
+            {\it Induction Step}: then it follows from the induction hypothesis that Step $6$ and
+            $7$ of \autoref{alg:max-single-sell-profit} report the correct maximum profit on the
+            left and right ($L_{profit}, R_{profit}$), as well as the corresponding minimum and
+            maximum values within them ($L_{min}, L_{max}, R_{min}$, and $R_{max}$). This is true
+            because on the left $|A| = \floor{n/2} < n$ and on the right $|A| = \ceil{n/2} < n$,
+            and the induction hypothesis along with the base case guarantees the correct output
+            for all problem sizes strictly less than $n$. Now when $|A| = n$, the location of the
+            maximum profit does not deviate from our initial assumption, i.e. it is either found
+            on the left (in which case $L_{max}$ is the correct output), or on the right (in which
+            case $R_{max}$ is the correct output) or in between, in which case the difference
+            $R_{max} - L_{min}$ is the correct output. But Step $8$ of
+            \autoref{alg:max-single-sell-profit} computes precisely the maximum among these values,
+            which means for a problem of size $n$, we have accounted for all possible locations of
+            the maximum profit, and picked the maximum one. So, if there is one, 
+            \autoref{alg:max-single-sell-profit} always outputs the correct maximum profit. \hfill
+            $\square$
+      \end{itemize}
+    \end{enumerate}
+\end{enumerate}
+\end{document}

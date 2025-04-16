@@ -1,0 +1,141 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{preamble}[
+  2021/11/21
+  A highly customizable blueprint for typesetting homework assignments.
+  Provided by Filemon Mateus <mateus@utah.edu>
+]
+% base packages
+\RequirePackage{algorithm}
+\RequirePackage{algpseudocode}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\RequirePackage{caption}
+\RequirePackage{enumitem}
+\RequirePackage{fancyhdr}
+\RequirePackage{float}
+\RequirePackage{geometry}
+\RequirePackage{hyperref}
+\RequirePackage{kpfonts-otf}
+\RequirePackage{bm}
+\RequirePackage{lastpage}
+\RequirePackage{mathtools}
+\RequirePackage{parskip}
+\RequirePackage{pgfplots}
+\RequirePackage{tcolorbox}
+\RequirePackage{thmtools}
+\RequirePackage{tikz}
+\RequirePackage{xcolor}
+
+% useful settings
+\geometry{
+  margin={1in},
+}
+\setlist{
+  itemsep={15pt},
+}
+\captionsetup{
+  labelfont={bf},
+  labelsep={period},
+  justification={centering},
+}
+\hypersetup{
+  colorlinks={true},
+  linkcolor={red!50!black},
+  citecolor={green!50!black},
+  urlcolor={blue!80!black}
+}
+
+% relax for customization
+\let\P\relax
+\let\O\relax
+\let\proof\relax
+\let\endproof\relax
+
+% useful symbols
+\DeclareMathOperator*{\E}{\mathbb{E}}
+\DeclareMathOperator*{\P}{\mathbb{P}}
+\DeclareMathOperator*{\O}{\mathcal{O}}
+
+% paired operators
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+
+% useful stylistic colors
+\definecolor{claimbg}{HTML}{fafafa}
+\definecolor{claimfg}{HTML}{000000}
+\definecolor{lemmabg}{HTML}{fffaf8}
+\definecolor{lemmafg}{HTML}{983b0f}
+\definecolor{remarkbg}{HTML}{fafafa}
+\definecolor{remarkfg}{HTML}{000000}
+\definecolor{theorembg}{HTML}{f2fff2}
+\definecolor{theoremfg}{HTML}{008000}
+\definecolor{corollarybg}{HTML}{f2fbfc}
+\definecolor{corollaryfg}{HTML}{191971}
+\definecolor{definitionbg}{HTML}{f2fff2}
+\definecolor{definitionfg}{HTML}{009b55}
+\definecolor{propositionbg}{HTML}{fcf3f6}
+\definecolor{propositionfg}{HTML}{60001a}
+
+% base style for claims, remarks, lemmas, and more
+\tcbuselibrary{skins}
+\tcbset{
+  base/.style={
+    left={\parskip},
+    right={\parskip},
+    after skip={\baselineskip},
+    boxrule={0pt},
+    frame hidden,
+    sharp corners,
+    enhanced
+  }
+}
+\pgfplotsinvokeforeach{claim, remark, theorem, lemma, corollary, definition, proposition}{
+  \tcbset{
+    #1box/.style={
+      base,
+      colback=#1bg,
+      borderline west={2pt}{0pt}{#1fg},
+    }
+  }
+  \declaretheoremstyle[
+    headfont=\bfseries\color{#1fg},
+    bodyfont=\normalfont,
+    headpunct={~~\textemdash~~},
+    postheadspace=0em,
+  ]{#1}
+  \declaretheorem[style=#1,name=\MakeUppercase#1,numbered=yes]{#1}
+  \declaretheorem[style=#1,name=\MakeUppercase#1,numbered=no]{#1*}
+  \tcolorboxenvironment{#1}{#1box}
+  \tcolorboxenvironment{#1*}{#1box}
+}
+
+\declaretheoremstyle[
+  headfont=\itshape,
+  bodyfont=\normalfont,
+  postheadspace=0.5em,
+  qed=$\square$,
+]{proof}
+\declaretheorem[style=proof,name=Proof,numbered=yes]{proof}
+\declaretheorem[style=proof,name=Proof,numbered=no]{proof*}
+
+% custom header
+\newcommand{\header}[5]{
+  \pagestyle{fancy}
+  \lhead{#1}
+  \chead{#2~~\textemdash~~#3~~\textemdash~~#4}
+  \rhead{#5}
+  \cfoot{{\thepage}/{\pageref{LastPage}}}
+}
+
+% algorithm pseudocode
+\algrenewcommand{\algorithmicrequire}{{\bf Input:}}
+\algrenewcommand{\algorithmicensure}{{\bf Output:}}
+\algrenewcommand{\algorithmiccomment}[1]{{\hfill\footnotesize\tt\color{green!50!black} // #1}}
+
+% default to latin modern
+\renewcommand{\ttdefault}{lmtt}
+\renewcommand{\sfdefault}{lmss}
+
+% update references
+\newcommand{\algorithmautorefname}{Algorithm}

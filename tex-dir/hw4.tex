@@ -1,0 +1,292 @@
+\documentclass{article}
+\usepackage{preamble}
+
+\begin{document}
+\header{Filemon Mateus}{CS 6150}{Graduate Algorithms}{Homework \# 4}{\today}
+\begin{enumerate}[leftmargin={*}, font={\bf}, label={\arabic*.}, ref={\arabic*}]
+  \item \label{qst:1}
+    \begin{enumerate}[ref={(\alph*)}]
+      \item \label{qst:1a}
+        Let $X_j$ be a random variable representing the total number of bees that land at the $j$-th
+        flower at round $i$. Since $X_j$ models the number of successful bees that land in the $j$-th
+        flower with probability $1/n$, then clearly $X_j \sim \text{Bin}(b, 1/n)$.  Correspondingly,
+        for a fixed flower $j$, the probability that such flower gets pollinated by exactly one bee
+        at round $i$ is:
+        \[
+          \P[X_j = 1] = {b \choose 1} \left(\frac{1}{n}\right) \left(1-\frac{1}{n}\right)^{b-1}
+                      = \frac{b}{n} \left(1-\frac{1}{n}\right)^{b-1}.
+        \]
+        Now, if we let $X$ model the total number of flowers which during round $i$ got pollinated
+        by exactly one bee, then clearly $X \sim \text{Bin}\left[n, \frac{b}{n} \left(1-\frac{1}{n}
+        \right)^{b-1}\right]$. Recall that if $X$ is binomial with probabily $p$ then its expectation
+        is $np$ where $n$ is the number of trials we run the experiment for. Thus, the expected number
+        of flowers that get pollinated by exactly one bee during round $i$ is:
+        \[
+          \E[X] = n \cdot \frac{b}{n} \left(1-\frac{1}{n}\right)^{b-1} = b \left(1-\frac{1}{n}\right)^{b-1}.
+        \]
+        Notice, this result also captures the expected number of bees that successfully collect
+        nectar during round $i$ and fly out of round $i+1$. So if we define $Y$ to be a random
+        variable associated with the total number of bees remaining at the start of round $i+1$,
+        then its expectation will be given as:
+        \[ 
+          \E[Y] = \E[b - X] = \E[b] - \E[X] = b - b \left(1-\frac{1}{n}\right)^{b-1}.
+        \]
+
+      \item \label{qst:1b}
+        Notice from the exact formula in part \ref{qst:1a} that a constant number of rounds, say
+        $k$, suffices to reduce $n$ bumblebees to $n/2$ bumblebees. Now, by recursively expanding
+        the inequality $X_{t+1} \leq X_t^2/n$, we see that:
+        \[
+          X_{k+t} \leq X_k^{2^t}/n^{2^t-1} \leq (n/2)^{2^t}/n^{2^t-1} \leq n/2^{2^t}.
+        \]
+        This value is $1$ precisely when $t = \O(\log \log n)$. Since $k$ is a constant, the total
+        number of rounds is $k + t = \O(\log \log n)$ as required!
+    \end{enumerate}
+
+  \item \label{qst:2}
+    \begin{enumerate}[ref={(\alph*)}]
+      \item \label{qst:2a}
+        Let $X$ be a random variable representing the total number of pairs $(i, j)$ with $i < j$
+        such that guest $i$ and the guest $j$ are wearing matching masks. Then we define $X_{ij}$
+        to be an indicator random variable associated with one of the single instances in which
+        guest $i$ and a guest $j$ are wearing matching masks. By linearity of expectations, we have:
+        \[
+          \E[X] = \E\left[\sum_{i=1}^{n-1} \sum_{j=i+1}^{n} X_{ij}\right]
+                = \sum_{i=1}^{n-1} \sum_{j=i+1}^{n} \E\left[X_{ij}\right]
+                = \sum_{i=1}^{n-1} \sum_{j=i+1}^{n} \P\left[X_{ij} = 1\right]
+                = \sum_{i=1}^{n-1} \sum_{j=i+1}^{n} \frac{1}{m} 
+                = \frac{n(n-1)}{2m}.
+       \]
+        When $\E[X] = 1$, we have $n(n-1) = 2m$, or equivalently, $n^2 - n - 2m = 0$. Solving for
+        $n$, we find that $n = \dfrac{1 + \sqrt{1+8m}}{2}$.
+
+      \item \label{qst:2b}
+        Let $X$ be a random variable representing the total number of house pairs $(i,j)$ with $i
+        < j$ that received the same template design during the fundraising. Following the same
+        strategic design as in part \ref{qst:2a}, we define an indicator random variable $X_{ij}$
+        associated with the event in which houses $i$ and $j$ receive the same template design.
+        Then, the $\E[X] = \frac{200 \times 199}{2,000,000} = 0.0199$. Since $X \geq 0$, we use
+        Markov's inequality to get the $\P[X \geq a] \leq \frac{1}{a}\E[X]$. Setting $a = 1$, we
+        get $\P[X \geq 1] \leq 0.0199$.
+    \end{enumerate}
+
+  \item \label{qst:3}
+    \begin{enumerate}
+      \item \label{qst:3a}
+        {\itshape Algorithm Description}
+
+        We proceed with a ``Divide and Conquer'' strategy augmented with randomized quick select.
+        Specifically, using quick select, we pick an element $x$ from $A$ with rank $k_{\floor{m/2}}$,
+        report it, and then partition $A$ around that element. Since $k_{\floor{m/2}}$ is the rank
+        of $x$, all the elements with ranks less than $k_{\floor{m/2}}$ will be to the left of $x$,
+        and all the elements with ranks greater than $k_{\floor{m/2}}$ will be to the right of $x$.
+        But this problem is structurally similar to the initial problem, so we invoke two additional
+        recursive calls---one on the left and one on the right---to conquer these two subproblems with
+        recursion.  We stop when the set of ranks $K$ becomes of size one, in which case we have the
+        canonical selection problem which can be easily tackled with quick select. The pseudocode for
+        this is given below.
+
+      \item \label{qst:3b}
+        {\itshape Algorithm Pseudocode} \vspace{-\baselineskip}
+
+        \begin{minipage}{\linewidth}
+          \begin{algorithm}[H]
+            \caption{$\textsc{Multi-Quick-Select}(A, K)$ \Comment{generalized selection problem}}\label{alg:multi-select}
+            \begin{algorithmic}[1]
+              \Require{An (unsorted) list of $n$ distinct numbers, $A[1 \cdots n]$, together with a monotonically
+              increasing sequence of $m$ distinct sorted ranks $K[1 \cdots m]$.}
+              \Ensure{The $k$-th smallest number in $A$ for all $k \in K$.}
+              \If{$|K| = 1$} \Comment{base case}
+                \State $x \gets \Call{Quick-Select}{A, K[1]}$ \Comment{randomized quick-select}
+                \State \Call{Print}{$x$}
+              \Else
+                \State $i \gets \floor{|K|/2}$
+                \State $x \gets \Call{Quick-Select}{A, K[i]}$
+                \State \Call{Print}{$x$}
+                \State $A_L \gets \{a \in A \mid a < x\}$ \Comment{aggregate all entries of $A < x$}
+                \State $A_R \gets \{a \in A \mid a > x\}$ \Comment{aggregate all entries of $A > x$}
+                \State $r \gets K[i]$ \Comment{define $r$ to be the rank of $x$ in $A$}
+                \State $K_L \gets \{k \in K \mid k < r\}$ \Comment{aggregate all entries of $K < r$}
+                \State $K_R \gets \{k - r \mid k \in K \land k > r\}$ \Comment{$\forall$ entries of $K > r$ aggregate their relative ranks $w.r.t.$ $r$}
+                \State \Call{Multi-Quick-Select}{$A_L, K_L$} \Comment{conquer the left $(A_L, K_L)$ with recursion}
+                \State \Call{Multi-Quick-Select}{$A_R, K_R$} \Comment{conquer the right $(A_R, K_R)$ with recursion}
+              \EndIf
+            \end{algorithmic}
+          \end{algorithm}
+        \end{minipage}
+
+      \item \label{qst:3c}
+        {\itshape Algorithm Correctness}
+
+        To demonstrate the correctness of \autoref{alg:multi-select}, we will assume a correct
+        implementation of \textsc{Quick-Select} and proceeed with (strong) induction on $m$---the
+        number of elements in $K$---also denoted by $|K|$.
+
+        \begin{itemize}[itemsep=0pt]
+          \item
+            {\itshape Base Case}: when $|K| = 1$ and $K$ is a singleton containing only one element,
+            \autoref{alg:multi-select} degenerates to a canonical selection problem which is solved
+            by the \textsc{Quick-Select} call in Step 2. Since by hypothesis \textsc{Quick-Select} is
+            correct---in that it reports the $k$-th smallest element of $A$ for the singular value of
+            $k \in K$---it must follow that \autoref{alg:multi-select} is also correct.
+
+          \item
+            {\itshape Induction Hypothesis}: assume \autoref{alg:multi-select} correctly reports the
+            $k$-th smallest number of $A$ for every $k \in K$ and $2 \leq |K| < m$.
+
+          \item
+            {\itshape Inductive Step}: now consider when $|K| = m$. Steps $11$ and $12$ of
+            \autoref{alg:multi-select} partitions $K$ into two sublists of nearly equal sizes. Let
+            $K_L$ and $K_R$ be these lists. Clearly, $|K_L| < m$ and $|K_R| < m$. Thus applying the
+            induction hypothesis, we are guaranteed that the two {\sc Multi-Quick-Select} calls in
+            Steps $13$ and $14$ of \autoref{alg:multi-select} correctly report the $k$-th smallest
+            number of $A_L$ (for every $k \in K_L$) and the $k$-th smallest number of $A_R$ (for
+            every $k \in K_R$). Therefore, a total of $|K_L| + |K_R| = |K| = m$ elements of $K$ are
+            correctly reported, which is exactly what we wanted to show! \hfill $\square$
+        \end{itemize}
+
+      \item \label{qst:3d}
+        {\itshape Time Analysis}
+
+        Let $T_M(n, m)$ be the total running time incurred by \autoref{alg:multi-select} on arbitrary
+        inputs of size $n$ and $m$. We define $T_Q(n)$ to be a random variable representing the
+        expected running time of \textsc{Quick-Select} on an arbitrary, unsorted list of $n$ distinct
+        elements. Notice that due to the degeneracy of the problem at the base case, we have that
+        $T_M(n, m) = T_Q(n)$ for $m = 1$. For the recursion, $A_L$ is a list of size $n_1$ and $A_R$
+        is a list of size $n_2$ where $n_1 + n_2 = n$. Furthermore, the \textsc{Quick-Select} call
+        in Step $6$ induces on the fly the construction of $A_L$ and $A_R$ so there is not need to
+        count the assignment calls of Steps $8$ and $9$ to the total running time. Additionally, per
+        the problem definition, the entries of $K$ are all distinct integers ranging from $1$ to $n$
+        so $|K| = m \leq n$. Thus constructing $K_L$ and $K_R$ in Steps $11$ and $12$ incurs at most
+        $\O(n)$ cost to the total running time. Stitching all these together, we have:
+        \[
+          T_M(n, m) =
+            \begin{cases}
+              T_Q(n) & \text{if}\ m = 1 \\
+              T_M(n_1, \floor{m/2}) + T_M(n_2, \ceil{m/2}) + T_Q(n) + n & \text{otherwise}
+            \end{cases}
+        \]
+        Following a similar probabilistic analysis to the randomized selection problem discussed in
+        class, we get that $T_Q(n)$ solves to $\O(n)$ on ``average.'' Hence the recurrence becomes:
+        \[
+          T_M(n, m) = 
+            \begin{cases}
+              n & \text{if}\ m = 1 \\
+              T_M(n_1, \floor{m/2}) + T_M(n_2, \ceil{m/2}) + n & \text{otherwise}
+            \end{cases}
+        \]
+        To solve this recurrence, we proceed with the recursion tree approach. For simplicity assume
+        $m$ is a power of $2$. Then the recursion tree is a complete binary tree with $m$ nodes at
+        the leaves and depth $\log m$. The work at the root node is $n$. At the next level is $n_1 +
+        n_2$ which is $n$. Each level incurs an $\O(n)$ cost and there are $\log m$ levels hence the
+        total work is $\O(n \log m)$. \hfill $\square$
+    \end{enumerate}
+
+  \item \label{qst:4}
+    \begin{enumerate}
+      \item \label{qst:4a}
+        {\itshape Algorithm Description}
+
+        We employ a similar strategy to that of the selection problem discussed in class, but instead
+        of looking at ranks we look at sums. Specifically, we partition $A$ around a pivot, say $x$,
+        and compute the sum of the entries that are less or equal to $x$. Then we have two possible
+        scenarios at hand: (1) the sum is greater than $M$, in which case we recurse on the left; and
+        (2) the sum is less or equal to $M$, in which case, we offset $M$ by that sum and recurse on
+        the right (see \autoref{alg:maximal-element} for details).
+
+      \item
+        {\itshape Algorithm Pseudocode} \vspace{-\baselineskip}
+
+        \begin{minipage}{\linewidth}
+          \begin{algorithm}[H]
+            \caption{$\textsc{Maximal-Element}(A, M)$}\label{alg:maximal-element}
+            \begin{algorithmic}[1]
+              \Require{An (unsorted) list of $n$ distinct numbers, $A[1 \cdots n]$, together with a number $M$.}
+              \Ensure{The maximal element $x$ of $A$ such that the summation $\sum_{(a \in A) \land (a < x)} a \leq M$.}
+              \If{$|A| = 1$}
+                \State \Return $A[1]$
+              \EndIf
+              \State
+              \State $x \gets \Call{Central-Pivot}{A}$
+              \State $A_L \gets \{a \in A \mid a \leq x\}$
+              \State $A_R \gets \{a \in A \mid a > x\}$
+              \State $S_L \gets \sum_{a \in A_L} a$
+              \State
+              \If{$M < S_L$}
+                \State \Return \Call{Maximal-Element}{$A_L, M$}
+              \Else
+                \State \Return \Call{Maximal-Element}{$A_R, M - S_L$}
+              \EndIf
+            \end{algorithmic}
+          \end{algorithm}
+        \end{minipage}
+
+      \item
+        {\itshape Algorithm Correctness}
+
+        To show the correctness of \autoref{alg:maximal-element} we will assume a correct implementation of
+        \textsc{Central-Pivot} and proceed with (strong) induction on $n$---the number of elements in $A$---
+        also denoted by $|A|$.
+
+        \begin{itemize}[itemsep=0pt]
+          \item
+            {\itshape Base Case}: when $|A| = 1$, we have the trivial case where the maximal element of
+            $A$ is none other than its singular entry $A[1]$. Furthermore, if $A$ contains only one element
+            (i.e. $|A| = 1$) then Step $2$ of \autoref{alg:maximal-element} gets executed---reporting $A[1]$
+            as its output. It follows then that \autoref{alg:maximal-element} correctly executes as intended
+            and produces the desired, expected output when $|A| = 1$.
+
+          \item
+            {\itshape Induction Hypothesis}: assume \autoref{alg:maximal-element} produces the correct maximal
+            element of $A$ whose sum of the elements less than it does not exceed $M$. For the purposes of
+            induction, assume this hypothesis is true whenever $|A| \leq k$, for every $k = 2, 3, \ldots, n-1$.
+
+          \item
+            {\itshape Inductive Step}: now consider when $|A| = n$. Notice that the \textsc{Central-Pivot}
+            subroutine in Step $5$ induces a partition on $A$ ($A_L$ and $A_R$) such that $n/4 \leq \min(|A_L|,
+            |A_R|) \leq \max(|A_L|, |A_R|) \leq 3n/4$. Without loss of generality, let $|A_L| = n/4$ and $|A_R|
+            = 3n/4$. Since $A_L$ and $A_R$ are disjoint, we have two execution paths: (1) the target maximal
+            element lies in $A_L$; (2) the target maximal element lies in $A_R$.
+
+            Let's first analyze execution path (1). When the target maximal element lies in $A_L$, the sum of
+            the elements of $A_L$ exceeds $M$, and we should recurse on $A_L$. (Notice Step $11$ of
+            \autoref{alg:maximal-element} does exactly that!) Now, since $|A_L| = n/4 < n$, we can invoke the
+            induction hypothesis to claim that \autoref{alg:maximal-element} produces the correct maximal element
+            of $A$ on execution path (1).
+
+            Similarly, when the target maximal element lies in $A_R$, it must be the case that the sum of the
+            elements of $A_L$ is at most $M$. In this case, we should recurse on $A_R$ and also offset $M$ by the
+            sum of all elements of $A_L$ since they all are strictly less than the entries of $A_R$. (Notice Step
+            $13$ of \autoref{alg:maximal-element} does exactly that!) Now, since $|A_R| = 3n/4 < n$, we can invoke
+            the induction hypothesis to claim that \autoref{alg:maximal-element} produces the desired, expected
+            output on execution path (2).
+
+            So irrespective of the execution path, \autoref{alg:maximal-element} always produces the correct answer
+            when $|A| = n$. \hfill $\square$
+        \end{itemize}
+
+      \item
+        {\itshape Time Analysis}
+
+        Let $T_M(n)$ represent the total running time of \autoref{alg:maximal-element} on an input of size
+        $n$. We define $T_C(n)$ to be a random variable representing the expected running time of the
+        \textsc{Central-Pivot} subroutine on an arbitrary, unsorted list of $n$ distinct elements. Then at
+        the base case we have $T_M(n) = 1$ for $n = 1$. For the recurssion, we have one subproblem of size of
+        $\max(|A_L|, |A_R|) \leq 3n/4$ followed by the cost of the \textsc{Central-Pivot} subroutine
+        ($T_C(n)$) and the cost of constructing $A_L, A_R$, and $S_L$ in Steps $6$, $7$, and $8$---which is
+        $\O(n)$. Then, the recurrence becomes:
+        \[
+          T_M(n) =
+            \begin{cases}
+              1 & \text{if}\ n = 1 \\
+              T_M(3n/4) + T_C(n) + n & \text{otherwise}
+            \end{cases}
+        \]
+        As discussed in class, the while in $T_C(n) \sim \text{Geom}(1/2)$ with expectation $1/p = 2 = \O(1)$,
+        so $T_C(n)$ finishes within a constant number of $\O(n)$ linear scans of $A$. Substituting this result
+        into the expression above, we get: $T_M(1) = 1$ and $T_M(n) = T_M(3n/4) + n$. With $a = 1, b = 4/3$, $
+        f(n) = n$, and $c = 3/4$, this recurrence solves to $\Theta(n)$, according to case $3$ of the Master
+        Theorem discussed in class. \hfill $\square$
+    \end{enumerate}
+\end{enumerate}
+\end{document}

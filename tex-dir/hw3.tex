@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage{preamble}
+
+\begin{document}
+\header{Filemon Mateus}{CS 6150}{Graduate Algorithms}{Homework \# 3}{\today}
+\begin{enumerate}[leftmargin={*}, font={\bf}, label={\arabic*.}, ref={\arabic*}]
+  \item \label{qst:1}
+    \begin{enumerate}
+      \item \label{qst:1a}
+        Let $R$ and $B$ denote the sets of red and blue terminal blocks, respectively. For
+        each $r_i \in R$, we associate a non-negative scalar value $l_{r_i}$, representing
+        the length of the wire emanating from terminal $r_i$. Analogously, for each $b_j \in
+        B$, we associate a non-negative wire length $l_{b_j}$. Then define $d_{ij}$ to be
+        the Euclidean distance between terminals $r_i$ and $b_j$, so that $d_{ij} = \|r_i -
+        b_j\|_2$. The primal problem is then formulated as follows:
+        \begin{gather*}
+          \text{maximize}\ -\left(\sum_{r_i \in R} l_{r_i} + \sum_{b_j \in B} l_{b_j}\right)\ \text{subject to} \\
+          -\left(l_{r_i} + l_{b_j}\right) \leq -d_{ij} \quad \forall r_i \in R \land \forall b_j \in B \\
+          l_{r_i} \geq 0 \quad \forall r_i \in R \\
+          l_{b_j} \geq 0 \quad \forall b_j \in B
+        \end{gather*}
+
+      \item \label{qst:1b}
+        To derive the dual formulation, we introduce non-negative Lagrangian multipliers $y_{ij}
+        \geq 0$ corresponding to each primal constraint $l_{r_i} + l_{b_j} \geq d_{ij}$ to obtain:
+        \begin{gather*}
+          \text{minimize}\ \sum_{r_i \in R} \sum_{b_j \in B} -d_{ij} \times y_{ij}\ \text{subject to} \\
+          -\sum_{r_i \in R} y_{ij} \geq -1 \quad \forall b_j \in B \\
+          -\sum_{b_j \in B} y_{ij} \geq -1 \quad \forall r_i \in R \\
+          y_{ij} \geq 0 \quad \forall r_i \in R \land \forall b_j \in B
+        \end{gather*}
+    \end{enumerate}
+
+  \item \label{qst:2}
+    Let $\mathcal{P}$ denote the following linear program in $n$ variables: $\mathcal{P}
+    = \min\{c^Tx \mid Ax \geq b, x \in \mathbb{R}^n\}$. Then, by asymmetric duality, the
+    \textit{primal} $\mathcal{P}$ corresponds to the \textit{dual} $\mathcal{D} = \max\{
+    b^Ty \mid A^Ty = c, y \geq 0\}$ in $m$ variables. Suppose this \textit{dual} is
+    feasible with maximum value $z$. Then, the following linear program $\mathcal{G} = \{
+    x \mid Ax \geq b, c^Tx \leq z\}$ is feasible only if $\mathcal{P}$ is feasible with
+    value at most $z$. This observation follows from the fact that $\min(c^Tx) \leq c^Tx
+    \leq z$ and the existence of an optimum $\min(c^Tx) > z$ in $\mathcal{P}$ violates the
+    second linear constraint of $\mathcal{G}$; thereby, making it infeasible.
+
+    Now, if we partition the interval $[-M, +M]$ with a neighborhood around $z$ of the form
+    $(z-\varepsilon, z+\varepsilon)$ with $\varepsilon > 0$, then the size of the search
+    space for the optimal value of $\mathcal{P}$ is precisely $M/\varepsilon$. This is
+    because the interval $[-M, +M]$ has length/measure $2M$ and a neighborhood of the form
+    $(z-\varepsilon, z+\varepsilon)$ has measure $2\varepsilon$. So partitioning $2M$ with
+    $2\varepsilon$ produces precisely $M/\varepsilon$ neighborhoods---each of size
+    $2\varepsilon$---where the optimal value of $\mathcal{P}$ lands up to an error of $\pm
+    \varepsilon$.
+
+    Thus, the tentative solution here is to execute binary search on these $M/\varepsilon$
+    intervals, and check for feasibility on the extremities $z-\varepsilon$ and $z+\varepsilon$
+    using the oracle. In other words, guess $z = 0$ to be the optimal, then if $\mathcal{G}$
+    is feasible at $z-\varepsilon$ search left; otherwise, if $\mathcal{G}$ is infeasible at
+    $z+\varepsilon$ search right. If none of the aforementioned conditions evaluate, i.e.
+    $\mathcal{G}$ is infeasible at $z-\varepsilon$ and feasible at $z+\varepsilon$ (meaning
+    that $z-\varepsilon < \min(c^Tx) \leq z+\varepsilon$) report $z\pm\varepsilon$ as the
+    optimal value of $\mathcal{P}$.
+
+    Since we have an initial problem space of size $M/\varepsilon$, and each time we either
+    search left or right, we're guaranteed to consult the oracle at most
+    $\O\left(\log\left(M/\varepsilon\right)\right)$ times.
+\end{enumerate}
+\end{document}
